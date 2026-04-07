@@ -17,12 +17,23 @@ module tb;
   always #50 clk = ~clk;
 
   // Program one instruction into instruction memory in program mode.
-  task load_instr(input [3:0] addr, input [7:0] instr);
+  task load_word(input [3:0] addr, input [15:0] word);
     begin
       @(posedge clk);
       #5;
       uio_in = {1'b0, 3'b000, addr};
-      ui_in = instr;
+      uio_in[6] = 1'b0;
+      ui_in = word[7:0];
+      ena = 1'b1;
+      @(posedge clk);
+      #5;
+      ena = 1'b0;
+
+      @(posedge clk);
+      #5;
+      uio_in = {1'b0, 3'b000, addr};
+      uio_in[6] = 1'b1;
+      ui_in = word[15:8];
       ena = 1'b1;
       @(posedge clk);
       #5;
@@ -61,23 +72,23 @@ module tb;
     $display("===================================================================");
     $display("                        ASSEMBLY PROGRAM                           ");
     $display("===================================================================");
-    $display("PC  | Instr | Assembly      | Expected Execution Result            ");
+    $display("PC  | Word  | Assembly      | Expected Execution Result            ");
     $display("----|-------|---------------|--------------------------------------");
-    $display("0x0 | 0x27  | ADDI R1, 3    | R1 = R1 (1) + 3 = 4      (0x04)    ");
-    $display("0x1 | 0x04  | ADD  R1, R2   | R1 = R1 (4) + R2 (2) = 6 (0x06)    ");
-    $display("0x2 | 0x1C  | SUB  R3, R2   | R3 = R3 (3) - R2 (2) = 1 (0x01)    ");
-    $display("0x3 | 0x2D  | ADDI R3, 1    | R3 = R3 (1) + 1 = 2      (0x02)    ");
-    $display("0x4 | 0x14  | SUB  R1, R2   | R1 = R1 (6) - R2 (2) = 4 (0x04)    ");
-    $display("0x5 | 0x51  | JUMP 1        | PC = 1. (Loops back to PC 0x1)     ");
+    $display("0x0 | 0x6113 | ADDI R1, 3    | R1 = R1 (1) + 3 = 4      (0x04)    ");
+    $display("0x1 | 0x0121 | ADD  R1, R2   | R1 = R1 (4) + R2 (2) = 6 (0x06)    ");
+    $display("0x2 | 0x1323 | SUB  R3, R2   | R3 = R3 (3) - R2 (2) = 1 (0x01)    ");
+    $display("0x3 | 0x6331 | ADDI R3, 1    | R3 = R3 (1) + 1 = 2      (0x02)    ");
+    $display("0x4 | 0x1121 | SUB  R1, R2   | R1 = R1 (6) - R2 (2) = 4 (0x04)    ");
+    $display("0x5 | 0x7001 | JUMP 1        | PC = 1. (Loops back to PC 0x1)     ");
     $display("===================================================================\n");
 
     $display("--- Loading Program into Instruction Memory ---");
-    load_instr(4'd0, 8'h27); // ADDI R1, 3
-    load_instr(4'd1, 8'h04); // ADD  R1, R2
-    load_instr(4'd2, 8'h1C); // SUB  R3, R2
-    load_instr(4'd3, 8'h2D); // ADDI R3, 1
-    load_instr(4'd4, 8'h14); // SUB  R1, R2
-    load_instr(4'd5, 8'h51); // JUMP 1
+    load_word(4'd0, 16'h6113); // ADDI R1, 3
+    load_word(4'd1, 16'h0121); // ADD  R1, R2
+    load_word(4'd2, 16'h1323); // SUB  R3, R2
+    load_word(4'd3, 16'h6331); // ADDI R3, 1
+    load_word(4'd4, 16'h1121); // SUB  R1, R2
+    load_word(4'd5, 16'h7001); // JUMP 1
 
     #100;
     $display("\n--- Running Program ---");
