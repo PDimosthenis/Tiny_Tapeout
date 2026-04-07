@@ -8,7 +8,7 @@ project:
   clock_hz:    10000000                               # Clock frequency in Hz (10 MHz)
 
   # Tile usage (single tile of about 160 x 100 um)
-  tiles: "1x2"                                       # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 8x2
+  tiles: "1x1"                                       # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 8x2
 
   # Top module (must start with "tt_um_")
   top_module: "tt_um_kishorenetheti_tt8_mips"
